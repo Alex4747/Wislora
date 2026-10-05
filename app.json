@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Wislora",
+    "slug": "wislora",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "wislora",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.rocksteady47.wislora",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.rocksteady47.wislora",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Wislora to access your photos so you can add product images.",
+          "cameraPermission": "Allow Wislora to take photos of products."
+        }
+      ],
+      "expo-status-bar",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4629a21a-20c7-4d8d-be9a-2c5996593a56"
+      }
+    }
+  }
+}

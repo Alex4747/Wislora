@@ -1,0 +1,5 @@
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useWishlist } from '../../hooks/useWishlist';
+import { useAppColors } from '../../hooks/useAppColors';
+export default function TabLayout() { const { prefs } = useWishlist(); const c = useAppColors(prefs.appearance); return <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: c.primary, tabBarInactiveTintColor: c.muted, tabBarStyle: { height: 86, paddingTop: 10, backgroundColor: c.surface, borderTopColor: c.border, elevation: 0 }, tabBarLabelStyle: { fontSize: 11, fontWeight: '600' } }}><Tabs.Screen name="index" options={{ title: 'Wishlist', tabBarIcon: ({ color, size }) => <Ionicons name="heart" size={size} color={color} /> }} /><Tabs.Screen name="categories" options={{ title: 'Categories', tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} /> }} /><Tabs.Screen name="settings" options={{ title: 'Settings', tabBarIcon: ({ color, size }) => <Ionicons name="options" size={size} color={color} /> }} /></Tabs>; }

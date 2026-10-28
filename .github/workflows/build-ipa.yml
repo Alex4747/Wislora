@@ -1,0 +1,83 @@
+
+name: Build unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Wislora
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Wislora
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate iOS project
+        run: npx expo prebuild --platform ios --non-interactive
+
+      - name: Install CocoaPods
+        working-directory: ios
+        run: pod install
+
+      - name: Build unsigned iOS app
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PROJECT="$(find ios -maxdepth 1 -name '*.xcodeproj' -print -quit)"
+          WORKSPACE="$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+
+          if [[ -z "$PROJECT" || -z "$WORKSPACE" ]]; then
+            echo "Xcode project or workspace not found"
+            exit 1
+          fi
+
+          SCHEME="$(basename "$PROJECT" .xcodeproj)"
+
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath "$PWD/build/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+          APP_PATH="$(find "$PWD/build/DerivedData/Build/Products" \
+            -maxdepth 2 -type d -name '*.app' \
+            ! -path '*/PlugIns/*' -print -quit)"
+
+          if [[ -z "$APP_PATH" ]]; then
+            echo "Built app not found"
+            exit 1
+          fi
+
+          mkdir -p "$PWD/build/Payload"
+          cp -R "$APP_PATH" "$PWD/build/Payload/"
+
+          (cd "$PWD/build" && zip -qry Wislora-unsigned.ipa Payload)
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wislora-unsigned-ipa
+          path: build/Wislora-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
